@@ -1,0 +1,23 @@
+.error-msg {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.success-state {
+  text-align: center;
+  padding: 64px 16px;
+}
+
+.success-mascot {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.success-state h2 {
+  margin-bottom: 8px;
+}

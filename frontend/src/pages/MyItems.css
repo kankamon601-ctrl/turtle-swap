@@ -1,0 +1,19 @@
+.my-items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .my-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 960px) {
+  .my-items-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}

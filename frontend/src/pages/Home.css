@@ -1,0 +1,124 @@
+.hero-banner {
+  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.hero-subtitle {
+  font-size: 13px;
+  color: #A7D5B8;
+  margin-top: 4px;
+}
+
+.hero-mascot {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 48px;
+  opacity: 0.25;
+}
+
+.search-container {
+  margin-bottom: 12px;
+}
+
+.search-input {
+  border-radius: var(--radius-xl) !important;
+  padding-left: 20px !important;
+}
+
+.category-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+
+.category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-pill {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: all 0.2s;
+}
+
+.cat-pill:hover {
+  border-color: var(--color-forest);
+  color: var(--color-forest);
+}
+
+.cat-pill-active {
+  background: var(--color-forest);
+  color: #fff;
+  border-color: var(--color-forest);
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 600px) {
+  .items-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 960px) {
+  .items-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+}
+
+.loading-mascot,
+.empty-mascot {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.loading-state p,
+.empty-state p {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}

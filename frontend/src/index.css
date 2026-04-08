@@ -1,0 +1,339 @@
+/* ============================================================
+   SwapMart Design System — Forest Theme
+   All colors, typography, and shared styles defined here.
+   Every component uses these variables for consistency.
+   ============================================================ */
+
+/* --- CSS Variables (the single source of truth) --- */
+:root {
+  /* Forest greens — darkest to lightest */
+  --color-deep-forest: #1B4332;
+  --color-forest: #2D6A4F;
+  --color-canopy: #40916C;
+  --color-leaf: #52B788;
+  --color-moss: #74C69D;
+  --color-sprout: #B7E4C7;
+  --color-mist: #D8F3DC;
+
+  /* Supporting colors */
+  --color-ocean: #2E86C1;
+  --color-ocean-light: #D6EAF8;
+  --color-amber: #E8913A;
+  --color-danger: #D94545;
+  --color-danger-light: #FCEBEB;
+
+  /* Neutrals */
+  --color-text: #1B3A2A;
+  --color-text-secondary: #5A7A65;
+  --color-bg: #F2F7F4;
+  --color-card: #FFFFFF;
+  --color-border: #C5DBC9;
+
+  /* Spacing & radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Font */
+  --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-forest);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* --- Layout --- */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.page {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 80px; /* space for bottom nav */
+}
+
+/* Desktop: add side padding for breathing room */
+@media (min-width: 768px) {
+  .page {
+    padding: 24px 40px 80px;
+  }
+}
+
+/* --- Typography --- */
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-deep-forest);
+  letter-spacing: -0.3px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-deep-forest);
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.text-small {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-main);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--color-forest);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--color-deep-forest);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--color-forest);
+  color: var(--color-forest);
+}
+
+.btn-outline:hover {
+  background: var(--color-mist);
+}
+
+.btn-danger {
+  background: transparent;
+  border: 2px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+/* --- Cards --- */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--color-border);
+  overflow: hidden;
+}
+
+/* --- Badges --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-condition {
+  background: var(--color-mist);
+  color: var(--color-deep-forest);
+}
+
+.badge-category {
+  background: #FFF3CD;
+  color: #7A5900;
+}
+
+.badge-matched {
+  background: var(--color-mist);
+  color: var(--color-forest);
+}
+
+.badge-rejected {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+/* --- Forms --- */
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-main);
+  color: var(--color-text);
+  background: var(--color-card);
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-forest);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%235A7A65' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+/* --- Stars --- */
+.stars {
+  color: var(--color-amber);
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+/* --- User avatar --- */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.avatar-forest {
+  background: var(--color-mist);
+  color: var(--color-deep-forest);
+}
+
+.avatar-ocean {
+  background: var(--color-ocean-light);
+  color: var(--color-ocean);
+}
+
+/* --- Utility --- */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-4 {
+  gap: 4px;
+}
+
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-12 {
+  gap: 12px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.mt-8 {
+  margin-top: 8px;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
