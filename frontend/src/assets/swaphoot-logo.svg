@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -20 240 90" role="img" aria-label="SwapHoot">
+  <title>SwapHoot</title>
+
+  <!-- Wordmark. The two "o"s in "Hoot" are the owl's eyes — a pupil dot
+       is overlaid on each to complete the joke. Clean, single element,
+       no separate mark, no ratio problem. -->
+  <text x="4" y="52"
+        font-family="'Lora', 'Iowan Old Style', 'Palatino', Georgia, serif"
+        font-weight="500"
+        font-size="52"
+        fill="currentColor"
+        letter-spacing="-1.5">SwapHoot</text>
+
+  <!-- Pupils inside the two o's of "Hoot" -->
+  <circle cx="172" cy="38" r="2.8" fill="currentColor"/>
+  <circle cx="199" cy="38" r="2.8" fill="currentColor"/>
+</svg>

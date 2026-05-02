@@ -2,6 +2,25 @@ import { useState, useEffect } from 'react';
 import { getMatches } from '../services/api';
 import './Matches.css';
 
+/* ---------- Icons ---------- */
+const SwapArrowIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="17 3 21 7 17 11"/>
+    <line x1="3" y1="7" x2="21" y2="7"/>
+    <polyline points="7 21 3 17 7 13"/>
+    <line x1="21" y1="17" x2="3" y2="17"/>
+  </svg>
+);
+
+const EmailIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="14" rx="2"/>
+    <polyline points="3 7 12 13 21 7"/>
+  </svg>
+);
+
 function Matches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,9 +42,9 @@ function Matches() {
   if (loading) {
     return (
       <div className="page">
-        <div className="loading-state">
-          <span className="loading-mascot">🐋</span>
-          <p>Wally is finding your matches...</p>
+        <div className="state-block">
+          <span className="eyebrow">Loading</span>
+          <p className="state-block-msg">Fetching your matches…</p>
         </div>
       </div>
     );
@@ -34,84 +53,103 @@ function Matches() {
   if (matches.length === 0) {
     return (
       <div className="page">
-        <h2 className="mb-16">My matches</h2>
-        <div className="empty-state">
-          <span className="empty-mascot">🐻‍❄️</span>
-          <h3>No matches yet</h3>
-          <p className="text-secondary">
-            Accept an offer to create your first match!
+        <header className="matches-header">
+          <span className="eyebrow">Your history</span>
+          <h1 className="matches-title">My matches</h1>
+        </header>
+        <div className="state-block">
+          <span className="eyebrow">Empty</span>
+          <h3 className="state-block-title">No matches yet</h3>
+          <p className="state-block-msg">
+            When you accept an offer, your swap will show up here.
           </p>
         </div>
       </div>
     );
   }
 
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
   return (
     <div className="page">
-      <h2 className="mb-16">My matches 💚</h2>
+      <header className="matches-header">
+        <span className="eyebrow">Your history</span>
+        <h1 className="matches-title">My matches</h1>
+        <p className="matches-sub">
+          {matches.length} swap{matches.length !== 1 ? 's' : ''} completed ·
+          {' '}{matches.length} item{matches.length !== 1 ? 's' : ''} kept out of landfill.
+        </p>
+      </header>
 
       <div className="matches-list">
         {matches.map((match) => {
           const offer = match.offer;
-          const partner = match.user_a.id === JSON.parse(localStorage.getItem('user')).id
-            ? match.user_b
-            : match.user_a;
+          const partner =
+            match.user_a.id === storedUser.id ? match.user_b : match.user_a;
 
           return (
-            <div key={match.id} className="card match-card">
-              <div className="match-card-header">
-                <div className="avatar avatar-ocean">
+            <article key={match.id} className="matches-row">
+              <header className="matches-row-head">
+                <div className="avatar avatar-forest">
                   {partner.username.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <span className="match-partner-name">
+                <div className="matches-row-head-text">
+                  <span className="matches-row-partner">
                     Matched with {partner.username}
                   </span>
-                  <span className="match-date">
+                  <span className="matches-row-date">
                     {new Date(match.matched_at).toLocaleDateString()}
                   </span>
                 </div>
+              </header>
+
+              <div className="matches-pair">
+                <div className="matches-pair-item">
+                  <span className="matches-pair-tag">Your item</span>
+                  <span className="matches-pair-title">
+                    {offer.target_item.title}
+                  </span>
+                </div>
+                <span className="matches-pair-arrow">
+                  <SwapArrowIcon />
+                </span>
+                <div className="matches-pair-item">
+                  <span className="matches-pair-tag">Their item</span>
+                  <span className="matches-pair-title">
+                    {offer.offered_item.title}
+                  </span>
+                </div>
               </div>
 
-              <div className="match-items">
-                <div className="match-item">
-                  <span className="match-item-label">Your item</span>
-                  <span className="match-item-title">{offer.target_item.title}</span>
-                </div>
-                <span className="match-arrow">⇄</span>
-                <div className="match-item">
-                  <span className="match-item-label">Their item</span>
-                  <span className="match-item-title">{offer.offered_item.title}</span>
-                </div>
-              </div>
-
-              <div className="match-contact">
-                <a href={`mailto:${partner.email}`} className="btn btn-primary btn-block">
-                  📧 Contact {partner.username}
-                </a>
-              </div>
-            </div>
+              <a
+                href={`mailto:${partner.email}`}
+                className="btn btn-primary btn-block matches-contact-btn"
+              >
+                <EmailIcon />
+                <span>Contact {partner.username}</span>
+              </a>
+            </article>
           );
         })}
       </div>
 
       {/* Impact tracker */}
-      <div className="impact-section mt-16">
-        <h3 className="mb-8">🌱 Your impact</h3>
-        <div className="impact-grid">
-          <div className="impact-card">
-            <span className="impact-number">{matches.length}</span>
-            <span className="impact-label">Items swapped</span>
+      <section className="matches-impact">
+        <span className="eyebrow">Your impact</span>
+        <div className="matches-impact-grid">
+          <div className="matches-impact-cell">
+            <span className="matches-impact-num">{matches.length}</span>
+            <span className="matches-impact-label">Items swapped</span>
           </div>
-          <div className="impact-card">
-            <span className="impact-number">{matches.length}</span>
-            <span className="impact-label">Items saved from landfill</span>
+          <div className="matches-impact-cell">
+            <span className="matches-impact-num">{matches.length}</span>
+            <span className="matches-impact-label">Kept from landfill</span>
           </div>
         </div>
-        <p className="impact-message">
-          🐢 You've given {matches.length} item{matches.length !== 1 ? 's' : ''} a second life!
+        <p className="matches-impact-msg">
+          You've given {matches.length} item{matches.length !== 1 ? 's' : ''} a second life.
         </p>
-      </div>
+      </section>
     </div>
   );
 }

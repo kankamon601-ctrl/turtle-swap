@@ -1,0 +1,107 @@
+/* ============================================================
+   Terms of Service — Nordic Forest
+   ============================================================ */
+
+.terms-nav {
+  max-width: 720px;
+  margin: 0 auto 12px;
+}
+
+.terms-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-forest-700);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.15s;
+}
+
+.terms-back:hover {
+  color: var(--color-forest-900);
+}
+
+.terms-header {
+  max-width: 720px;
+  margin: 0 auto 24px;
+}
+
+.terms-title {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--color-forest-900);
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin: 6px 0 12px;
+}
+
+.terms-intro {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.terms-doc {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 32px 36px;
+}
+
+.terms-section {
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.terms-section:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.terms-section-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-forest-900);
+  margin: 0 0 10px;
+  letter-spacing: -0.2px;
+}
+
+.terms-section p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text);
+  margin: 0 0 10px;
+}
+
+.terms-section p:last-child {
+  margin-bottom: 0;
+}
+
+.terms-list {
+  margin: 8px 0 0;
+  padding-left: 22px;
+}
+
+.terms-list li {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.terms-list li:last-child {
+  margin-bottom: 0;
+}

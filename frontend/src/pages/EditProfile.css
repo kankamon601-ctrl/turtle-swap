@@ -1,0 +1,112 @@
+/* ============================================================
+   EditProfile / EditItem shared form layout — Nordic Forest
+   ============================================================ */
+
+.edit-nav {
+  max-width: 560px;
+  margin: 0 auto 12px;
+}
+
+.edit-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-forest-700);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.15s;
+}
+
+.edit-back:hover {
+  color: var(--color-forest-900);
+}
+
+.edit-header {
+  max-width: 560px;
+  margin: 0 auto 18px;
+}
+
+.edit-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--color-forest-900);
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-top: 6px;
+}
+
+.edit-form {
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.edit-section {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.edit-section:last-of-type {
+  padding-bottom: 4px;
+  margin-bottom: 18px;
+  border-bottom: none;
+}
+
+.edit-section-eyebrow {
+  margin-bottom: 6px;
+}
+
+.edit-section-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+/* ---------- Messages ---------- */
+.error-msg {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--color-danger);
+}
+
+.info-msg {
+  background: var(--color-forest-100);
+  color: var(--color-forest-900);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--color-forest-700);
+}
+
+/* ---------- Legacy classes — kept inert ---------- */
+.edit-profile-card,
+.form-section-label,
+.form-hint,
+.warning-msg,
+.phone-row,
+.phone-code-group,
+.phone-number-group {
+  /* Old styling no longer applied; classes left in case other code references them */
+}
+
+.form-section-label,
+.warning-msg {
+  display: none;
+}

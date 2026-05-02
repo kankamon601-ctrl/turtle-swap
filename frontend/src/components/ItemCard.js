@@ -1,59 +1,77 @@
 import { useNavigate } from 'react-router-dom';
 import './ItemCard.css';
 
-function ItemCard({ item, distance }) {
+const CONDITION_LABELS = {
+  new: 'New',
+  like_new: 'Like new',
+  good: 'Good',
+  fair: 'Fair',
+};
+
+const CATEGORY_LABELS = {
+  electronics: 'Electronics',
+  automotive: 'Automotive',
+  home: 'Home',
+  garden: 'Garden',
+  sports: 'Sports',
+  books: 'Books',
+  hardware: 'Hardware',
+  fashion: 'Fashion',
+  other: 'Other',
+};
+
+function ItemCard({ item, distance, browseList }) {
   const navigate = useNavigate();
 
-  const gradients = {
-    phones: 'item-img-forest',
-    cameras: 'item-img-ocean',
-    computers: 'item-img-arctic',
-    electronics: 'item-img-forest',
-    default: 'item-img-forest',
+  const handleClick = () => {
+    navigate(
+      `/item/${item.id}`,
+      browseList ? { state: { browseList } } : undefined
+    );
   };
 
-  const icons = {
-    phones: '\u{1F4F1}', cameras: '\u{1F4F7}', computers: '\u{1F4BB}',
-    electronics: '\u{1F50C}', fashion: '\u{1F455}', home: '\u{1F3E0}',
-    sports: '\u26BD', books: '\u{1F4DA}', games: '\u{1F3AE}', default: '\u{1F4E6}',
-  };
-
-  const conditionLabels = {
-    new: '\u2728 New', like_new: '\u{1F33F} Like new',
-    good: '\u{1F44D} Good', fair: '\u{1F527} Fair',
-  };
-
-  const gradientClass = gradients[item.category] || gradients.default;
-  const icon = icons[item.category] || icons.default;
-  const conditionLabel = conditionLabels[item.condition] || item.condition;
+  const conditionLabel = CONDITION_LABELS[item.condition] || item.condition;
+  const categoryLabel = CATEGORY_LABELS[item.category] || item.category;
   const isSwapped = item.status === 'pending' || item.status === 'swapped';
-  const firstImage = item.images && item.images.length > 0 ? item.images[0].image_url : null;
+  const firstImage =
+    item.images && item.images.length > 0 ? item.images[0].image_url : null;
 
   return (
-    <div className={`item-card card ${isSwapped ? 'item-card-swapped' : ''}`} onClick={() => navigate(`/item/${item.id}`)}>
-      {isSwapped && (
-        <div className="item-card-status-overlay">
-          <span className="item-card-status-badge">
-            {item.status === 'swapped' ? '\u{1F331} Swapped' : '\u{1F91D} Pending swap'}
-          </span>
-        </div>
-      )}
-      <div className={`item-card-img ${gradientClass}`}>
+    <div
+      className={`item-card ${isSwapped ? 'item-card-swapped' : ''}`}
+      onClick={handleClick}
+    >
+      <div className="item-card-img">
         {firstImage ? (
-          <img src={firstImage} alt={item.title} className="item-card-photo" />
+          <img
+            src={firstImage}
+            alt={item.title}
+            className="item-card-photo"
+          />
         ) : (
-          <span className="item-card-icon">{icon}</span>
+          <div className="item-card-placeholder">
+            <span className="eyebrow">{categoryLabel}</span>
+          </div>
         )}
+
+        {isSwapped && (
+          <span className="item-card-status-badge">
+            {item.status === 'swapped' ? 'Swapped' : 'Pending'}
+          </span>
+        )}
+
         {distance !== undefined && (
           <span className="item-card-distance">{distance} km</span>
         )}
       </div>
+
       <div className="item-card-info">
         <h3 className="item-card-title">{item.title}</h3>
+
         <div className="item-card-meta">
           <span className="badge badge-condition">{conditionLabel}</span>
-          {item.owner && <span className="stars">{'\u2605'.repeat(5)}</span>}
         </div>
+
         {item.owner && (
           <div className="item-card-owner">
             <div className="avatar avatar-forest">
@@ -62,7 +80,7 @@ function ItemCard({ item, distance }) {
             <div>
               <span className="item-card-owner-name">{item.owner.username}</span>
               <span className="item-card-owner-location">
-                {item.owner.location || 'Unknown location'}
+                {item.owner.location || 'No location set'}
               </span>
             </div>
           </div>

@@ -1,7 +1,26 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createItem } from '../services/api';
+import { createItem, uploadItemImages } from '../services/api';
 import './ListItem.css';
+
+const CATEGORIES = [
+  { value: 'electronics', label: 'Electronics & Components' },
+  { value: 'automotive', label: 'Automotive & Mechanical' },
+  { value: 'home',        label: 'Home & Furniture' },
+  { value: 'garden',      label: 'Garden & Outdoor' },
+  { value: 'sports',      label: 'Sports' },
+  { value: 'books',       label: 'Books' },
+  { value: 'hardware',    label: 'Hardware & Materials' },
+  { value: 'fashion',     label: 'Fashion' },
+  { value: 'other',       label: 'Other' },
+];
+
+const CONDITIONS = [
+  { value: 'new',      label: 'New — never used' },
+  { value: 'like_new', label: 'Like new — barely used' },
+  { value: 'good',     label: 'Good — normal wear' },
+  { value: 'fair',     label: 'Fair — visible wear' },
+];
 
 function ListItem() {
   const [title, setTitle] = useState('');
@@ -14,26 +33,6 @@ function ListItem() {
   const [images, setImages] = useState([]);
   const navigate = useNavigate();
 
-  const categories = [
-    { value: 'electronics', label: '🔌 Electronics' },
-    { value: 'phones', label: '📱 Phones' },
-    { value: 'computers', label: '💻 Computers' },
-    { value: 'cameras', label: '📷 Cameras' },
-    { value: 'fashion', label: '👕 Fashion' },
-    { value: 'home', label: '🏠 Home' },
-    { value: 'sports', label: '⚽ Sports' },
-    { value: 'books', label: '📚 Books' },
-    { value: 'games', label: '🎮 Games' },
-    { value: 'other', label: '📦 Other' },
-  ];
-
-  const conditions = [
-    { value: 'new', label: '✨ New - never used' },
-    { value: 'like_new', label: '🌿 Like new - barely used' },
-    { value: 'good', label: '👍 Good - normal wear' },
-    { value: 'fair', label: '🔧 Fair - visible wear' },
-  ];
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -45,10 +44,23 @@ function ListItem() {
 
     setLoading(true);
     try {
-      await createItem({ title, description, category, condition });
+      const res = await createItem({ title, description, category, condition });
+      const itemId = res.data.item?.id;
+
+      if (images.length > 0) {
+        if (!itemId) {
+          console.error('Item created but no ID returned:', res.data);
+          setError('Item created but failed to get item ID for image upload');
+          setLoading(false);
+          return;
+        }
+        await uploadItemImages(itemId, images);
+      }
+
       setSuccess(true);
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
+      console.error('Create/upload error:', err);
       setError(err.response?.data?.error || 'Failed to create listing');
     }
     setLoading(false);
@@ -57,11 +69,11 @@ function ListItem() {
   if (success) {
     return (
       <div className="page">
-        <div className="success-state">
-          <span className="success-mascot">🐢</span>
-          <h2>Listed! 🌱</h2>
-          <p className="text-secondary">
-            Turt is happy — your item is now available for swapping!
+        <div className="state-block">
+          <span className="eyebrow">Listed</span>
+          <h2 className="state-block-title">Your item is live</h2>
+          <p className="state-block-msg">
+            Heading back to the home feed…
           </p>
         </div>
       </div>
@@ -70,14 +82,17 @@ function ListItem() {
 
   return (
     <div className="page">
-      <h2 className="mb-8">List an item 🌿</h2>
-      <p className="text-secondary mb-16">
-        Give your stuff a second life — someone might love it!
-      </p>
+      <header className="list-header">
+        <span className="eyebrow">New listing</span>
+        <h1 className="list-title">List an item</h1>
+        <p className="list-sub">
+          Give your stuff a second life — someone nearby might love it.
+        </p>
+      </header>
 
-      {error && <div className="error-msg">{error}</div>}
+      <form className="list-form" onSubmit={handleSubmit}>
+        {error && <div className="error-msg">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label className="form-label">Photos (max 4)</label>
           <input
@@ -98,14 +113,14 @@ function ListItem() {
             }}
           />
           {images.length > 0 && (
-            <p className="text-small mt-8">
+            <p className="list-hint">
               {images.length} image{images.length !== 1 ? 's' : ''} selected
             </p>
           )}
         </div>
 
         <div className="form-group">
-          <label className="form-label">What are you swapping? *</label>
+          <label className="form-label">What are you swapping?</label>
           <input
             type="text"
             className="input"
@@ -119,42 +134,46 @@ function ListItem() {
           <label className="form-label">Description</label>
           <textarea
             className="input textarea"
-            placeholder="Describe your item — condition, what's included, why you're swapping..."
+            placeholder="Describe condition, what's included, why you're swapping…"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Category *</label>
+          <label className="form-label">Category</label>
           <select
             className="input select"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">Select a category</option>
-            {categories.map((cat) => (
+            {CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </select>
         </div>
 
         <div className="form-group">
-          <label className="form-label">Condition *</label>
+          <label className="form-label">Condition</label>
           <select
             className="input select"
             value={condition}
             onChange={(e) => setCondition(e.target.value)}
           >
             <option value="">Select condition</option>
-            {conditions.map((cond) => (
+            {CONDITIONS.map((cond) => (
               <option key={cond.value} value={cond.value}>{cond.label}</option>
             ))}
           </select>
         </div>
 
-        <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-          {loading ? 'Listing...' : '🌱 List my item'}
+        <button
+          type="submit"
+          className="btn btn-primary btn-block"
+          disabled={loading}
+        >
+          {loading ? 'Listing…' : 'List my item'}
         </button>
       </form>
     </div>

@@ -1,17 +1,25 @@
+import re
 from math import radians, cos, sin, asin, sqrt
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
 from models import db, Item, ItemImage, User
+from extensions import current_user_id
 
 items_bp = Blueprint("items", __name__, url_prefix="/api/items")
 
 VALID_CATEGORIES = [
-    "electronics", "phones", "computers", "cameras",
-    "fashion", "home", "sports", "books", "games", "other",
+    "electronics", "automotive", "home", "garden",
+    "sports", "books", "hardware", "fashion", "other",
 ]
 VALID_CONDITIONS = ["new", "like_new", "good", "fair"]
+
+
+def _get_item_by_public_id(public_id):
+    """Look up an item by its public_id (the UUID exposed in URLs/API).
+    Returns None if not found."""
+    return Item.query.filter_by(public_id=public_id).first()
 
 
 # ---------------------------------------------------------------------------
@@ -34,6 +42,20 @@ def list_items():
     search = request.args.get("search")
     if search:
         query = query.filter(Item.title.ilike(f"%{search}%"))
+
+    # Filter by location (city, country) — split on commas and spaces
+    location_q = request.args.get("location", "").strip()
+    if location_q:
+        query = query.join(User, Item.user_id == User.id)
+        terms = [t for t in re.split(r"[,\s]+", location_q) if t]
+        for term in terms:
+            like = f"%{term}%"
+            query = query.filter(
+                db.or_(
+                    User.city.ilike(like),
+                    User.country.ilike(like),
+                )
+            )
 
     # Pagination
     page = request.args.get("page", 1, type=int)
@@ -59,7 +81,7 @@ def list_items():
 @items_bp.route("/my", methods=["GET"])
 @jwt_required()
 def my_items():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
     items = Item.query.filter_by(user_id=user_id).order_by(
         Item.created_at.desc()
     ).all()
@@ -75,14 +97,12 @@ def my_items():
 def nearby_items():
     lat = request.args.get("lat", type=float)
     lng = request.args.get("lng", type=float)
-    radius = request.args.get("radius", 20.0, type=float)
+    radius = request.args.get("radius", 0, type=float)  # 0 = no limit
 
     if lat is None or lng is None:
         return jsonify({"error": "lat and lng parameters are required"}), 400
 
-    radius = min(radius, 100.0)
-
-    items = (
+    query = (
         Item.query
         .join(User, Item.user_id == User.id)
         .filter(
@@ -90,13 +110,40 @@ def nearby_items():
             User.latitude.isnot(None),
             User.longitude.isnot(None),
         )
-        .all()
     )
+
+    # Same filters as the regular list endpoint so the UI can combine them
+    category = request.args.get("category")
+    if category and category in VALID_CATEGORIES:
+        query = query.filter(Item.category == category)
+
+    condition = request.args.get("condition")
+    if condition and condition in VALID_CONDITIONS:
+        query = query.filter(Item.condition == condition)
+
+    search = request.args.get("search")
+    if search:
+        query = query.filter(Item.title.ilike(f"%{search}%"))
+
+    # Filter by location (city, country) — split on commas and spaces
+    location_q = request.args.get("location", "").strip()
+    if location_q:
+        terms = [t for t in re.split(r"[,\s]+", location_q) if t]
+        for term in terms:
+            like = f"%{term}%"
+            query = query.filter(
+                db.or_(
+                    User.city.ilike(like),
+                    User.country.ilike(like),
+                )
+            )
+
+    items = query.all()
 
     nearby = []
     for item in items:
         distance = haversine(lat, lng, item.owner.latitude, item.owner.longitude)
-        if distance <= radius:
+        if radius <= 0 or distance <= radius:
             item_data = item.to_dict()
             item_data["distance_km"] = round(distance, 1)
             nearby.append(item_data)
@@ -106,17 +153,16 @@ def nearby_items():
     return jsonify({
         "items": nearby,
         "total": len(nearby),
-        "radius_km": radius,
         "your_location": {"lat": lat, "lng": lng},
     }), 200
 
 
 # ---------------------------------------------------------------------------
-# GET /api/items/<id> - get single item details
+# GET /api/items/<public_id> - get single item details
 # ---------------------------------------------------------------------------
 @items_bp.route("/<item_id>", methods=["GET"])
 def get_item(item_id):
-    item = Item.query.get(item_id)
+    item = _get_item_by_public_id(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
 
@@ -129,7 +175,7 @@ def get_item(item_id):
 @items_bp.route("", methods=["POST"])
 @jwt_required()
 def create_item():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
     data = request.get_json()
 
     # Validate
@@ -155,6 +201,8 @@ def create_item():
         estimated_value=data.get("estimated_value", 0.0),
     )
     db.session.add(item)
+    # Flush so item.id (int PK) is populated for any image rows below.
+    db.session.flush()
 
     # Add image URLs if provided
     for i, url in enumerate(data.get("image_urls", [])):
@@ -166,13 +214,13 @@ def create_item():
 
 
 # ---------------------------------------------------------------------------
-# PUT /api/items/<id> - update your listing
+# PUT /api/items/<public_id> - update your listing
 # ---------------------------------------------------------------------------
 @items_bp.route("/<item_id>", methods=["PUT"])
 @jwt_required()
 def update_item(item_id):
-    user_id = get_jwt_identity()
-    item = Item.query.get(item_id)
+    user_id = current_user_id()
+    item = _get_item_by_public_id(item_id)
 
     if not item:
         return jsonify({"error": "Item not found"}), 404
@@ -198,13 +246,13 @@ def update_item(item_id):
 
 
 # ---------------------------------------------------------------------------
-# DELETE /api/items/<id> - remove your listing
+# DELETE /api/items/<public_id> - remove your listing
 # ---------------------------------------------------------------------------
 @items_bp.route("/<item_id>", methods=["DELETE"])
 @jwt_required()
 def delete_item(item_id):
-    user_id = get_jwt_identity()
-    item = Item.query.get(item_id)
+    user_id = current_user_id()
+    item = _get_item_by_public_id(item_id)
 
     if not item:
         return jsonify({"error": "Item not found"}), 404
@@ -235,7 +283,7 @@ def haversine(lat1, lon1, lat2, lon2):
 @items_bp.route("/update-location", methods=["PUT"])
 @jwt_required()
 def update_location():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
     user = User.query.get(user_id)
     data = request.get_json()
 
@@ -254,13 +302,13 @@ def update_location():
 
 
 # ---------------------------------------------------------------------------
-# POST /api/items/<id>/images - upload images for an item (max 4)
+# POST /api/items/<public_id>/images - upload images for an item (max 4)
 # ---------------------------------------------------------------------------
 @items_bp.route("/<item_id>/images", methods=["POST"])
 @jwt_required()
 def upload_images(item_id):
-    user_id = get_jwt_identity()
-    item = Item.query.get(item_id)
+    user_id = current_user_id()
+    item = _get_item_by_public_id(item_id)
 
     if not item:
         return jsonify({"error": "Item not found"}), 404
@@ -269,7 +317,7 @@ def upload_images(item_id):
         return jsonify({"error": "You can only upload images to your own items"}), 403
 
     # Check how many images this item already has
-    existing_count = ItemImage.query.filter_by(item_id=item_id).count()
+    existing_count = ItemImage.query.filter_by(item_id=item.id).count()
 
     if "images" not in request.files:
         return jsonify({"error": "No images provided"}), 400
@@ -282,7 +330,7 @@ def upload_images(item_id):
             "error": f"Maximum 4 images per item. You can upload {remaining} more."
         }), 400
 
-    from services.image import allowed_file, check_image_safety, upload_image
+    from services.image import allowed_file, check_image_safety, resize_image, upload_image
 
     uploaded_urls = []
     for i, file in enumerate(files):
@@ -298,12 +346,16 @@ def upload_images(item_id):
         # Read file data
         file_data = file.read()
 
-        # Safety check
+        # Safety check on raw data (verifies it's a real image, not too huge)
         is_safe, message = check_image_safety(file_data)
         if not is_safe:
             return jsonify({"error": f"Image rejected: {message}"}), 400
 
-        # Upload with auto-resize
+        # Auto-resize before upload (so large photos from phones work fine)
+        resized_buffer = resize_image(file_data)
+        file_data = resized_buffer.read()
+
+        # Upload resized image
         try:
             image_url = upload_image(file_data, file.filename)
         except Exception as e:
@@ -311,7 +363,7 @@ def upload_images(item_id):
 
         # Save to database
         image = ItemImage(
-            item_id=item_id,
+            item_id=item.id,
             image_url=image_url,
             sort_order=existing_count + i,
         )
@@ -325,3 +377,27 @@ def upload_images(item_id):
         "images": uploaded_urls,
         "total_images": existing_count + len(uploaded_urls),
     }), 201
+
+
+# ---------------------------------------------------------------------------
+# DELETE /api/items/<public_id>/images/<int:image_id> - remove a single image
+# ---------------------------------------------------------------------------
+@items_bp.route("/<item_id>/images/<int:image_id>", methods=["DELETE"])
+@jwt_required()
+def delete_image(item_id, image_id):
+    user_id = current_user_id()
+    item = _get_item_by_public_id(item_id)
+
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    if item.user_id != user_id:
+        return jsonify({"error": "You can only manage your own items"}), 403
+
+    image = ItemImage.query.filter_by(id=image_id, item_id=item.id).first()
+    if not image:
+        return jsonify({"error": "Image not found"}), 404
+
+    db.session.delete(image)
+    db.session.commit()
+    return jsonify({"message": "Image deleted"}), 200

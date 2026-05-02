@@ -1,7 +1,60 @@
+/* ============================================================
+   MyItems — Nordic Forest
+   ============================================================ */
+
+.my-items-nav {
+  max-width: 1100px;
+  margin: 0 auto 12px;
+}
+
+.my-items-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-forest-700);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.15s;
+}
+
+.my-items-back:hover {
+  color: var(--color-forest-900);
+}
+
+.my-items-header {
+  max-width: 1100px;
+  margin: 0 auto 20px;
+}
+
+.my-items-title {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--color-forest-900);
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-top: 6px;
+}
+
+.my-items-sub {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Grid ---------- */
 .my-items-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 14px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 @media (min-width: 600px) {
@@ -16,4 +69,58 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
+}
+
+.my-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Edit / Delete actions ---------- */
+.my-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.my-item-action {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.my-item-edit:hover {
+  background: var(--color-forest-900);
+  border-color: var(--color-forest-900);
+  color: #fff;
+}
+
+.my-item-delete {
+  color: var(--color-danger);
+}
+
+.my-item-delete:hover {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
+}
+
+/* Legacy classes — keep inert in case referenced */
+.my-item-edit-btn,
+.my-item-delete-btn {
+  all: unset;
+  display: none;
 }

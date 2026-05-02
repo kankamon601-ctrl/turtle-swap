@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
 from models import Match
+from extensions import current_user_id
 
 matches_bp = Blueprint("matches", __name__, url_prefix="/api/matches")
 
@@ -12,7 +13,7 @@ matches_bp = Blueprint("matches", __name__, url_prefix="/api/matches")
 @matches_bp.route("", methods=["GET"])
 @jwt_required()
 def my_matches():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
 
     matches = (
         Match.query

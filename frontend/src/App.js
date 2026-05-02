@@ -3,11 +3,16 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Terms from './pages/Terms';
 import ListItem from './pages/ListItem';
 import Offers from './pages/Offers';
 import Matches from './pages/Matches';
 import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
 import ItemDetail from './pages/ItemDetail';
+import EditItem from './pages/EditItem';
 import MyItems from './pages/MyItems';
 import './index.css';
 
@@ -26,6 +31,10 @@ function App() {
     setUser(null);
   };
 
+  const handleUserUpdate = (updated) => {
+    setUser(updated);
+  };
+
   return (
     <BrowserRouter>
       <div className="app-container">
@@ -38,11 +47,18 @@ function App() {
             }
           />
 
+          {/* Password reset — public, even when logged in is fine */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          {/* Legal — public */}
+          <Route path="/terms" element={<Terms />} />
+
+          {/* Public pages — no login required */}
+          <Route path="/" element={<Home />} />
+          <Route path="/item/:id" element={<ItemDetail />} />
+
           {/* Protected pages — require login */}
-          <Route
-            path="/"
-            element={user ? <Home /> : <Navigate to="/login" />}
-          />
           <Route
             path="/list"
             element={user ? <ListItem /> : <Navigate to="/login" />}
@@ -66,8 +82,18 @@ function App() {
             }
           />
           <Route
-            path="/item/:id"
-            element={user ? <ItemDetail /> : <Navigate to="/login" />}
+            path="/edit-profile"
+            element={
+              user ? (
+                <EditProfile user={user} onUserUpdate={handleUserUpdate} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/edit-item/:id"
+            element={user ? <EditItem /> : <Navigate to="/login" />}
           />
           <Route
             path="/my-items"
@@ -75,8 +101,8 @@ function App() {
           />
         </Routes>
 
-        {/* Show navbar only when logged in */}
-        {user && <Navbar />}
+        {/* Show navbar always — adapts for guests vs logged-in */}
+        <Navbar user={user} />
       </div>
     </BrowserRouter>
   );

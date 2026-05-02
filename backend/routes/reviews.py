@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from sqlalchemy import func
 
 from models import db, Review, Match, User
+from extensions import current_user_id
 
 reviews_bp = Blueprint("reviews", __name__, url_prefix="/api/reviews")
 
@@ -13,7 +14,7 @@ reviews_bp = Blueprint("reviews", __name__, url_prefix="/api/reviews")
 @reviews_bp.route("", methods=["POST"])
 @jwt_required()
 def create_review():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
     data = request.get_json()
 
     # Validate required fields
@@ -60,9 +61,9 @@ def create_review():
 
 
 # ---------------------------------------------------------------------------
-# GET /api/reviews/user/<user_id> - get all reviews for a user
+# GET /api/reviews/user/<int:user_id> - get all reviews for a user
 # ---------------------------------------------------------------------------
-@reviews_bp.route("/user/<user_id>", methods=["GET"])
+@reviews_bp.route("/user/<int:user_id>", methods=["GET"])
 def get_user_reviews(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -97,7 +98,7 @@ def get_user_reviews(user_id):
 @reviews_bp.route("/my", methods=["GET"])
 @jwt_required()
 def my_reviews():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
 
     reviews = (
         Review.query

@@ -1,97 +1,139 @@
+/* ============================================================
+   ItemCard — Nordic Forest
+   ============================================================ */
+
 .item-card {
   cursor: pointer;
-  transition: transform 0.15s;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
 
 .item-card:hover {
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
 }
 
+/* ---------- Image area ---------- */
 .item-card-img {
-  height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  aspect-ratio: 1 / 1;
   position: relative;
+  overflow: hidden;
+  background: var(--color-surface-sunk);
 }
 
-.item-img-forest {
-  background: linear-gradient(135deg, #B7E4C7 0%, #74C69D 50%, #52B788 100%);
-}
-
-.item-img-ocean {
-  background: linear-gradient(135deg, #89CFF0 0%, #5DADE2 50%, #2E86C1 100%);
-}
-
+/* Legacy gradient classes become inert no-ops */
+.item-img-forest,
+.item-img-ocean,
 .item-img-arctic {
-  background: linear-gradient(135deg, #D6EAF8 0%, #AED6F1 50%, #85C1E9 100%);
-}
-
-.item-card-icon {
-  font-size: 48px;
+  background: var(--color-surface-sunk);
 }
 
 .item-card-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.item-card-swapped {
-  opacity: 0.7;
-  position: relative;
+/* No-photo placeholder: flat sage panel with category label */
+.item-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-forest-100);
+  color: var(--color-forest-700);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.item-card-status-overlay {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 2;
+.item-card-placeholder .eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
 }
+
+/* Old emoji icon — hidden (kept class for back-compat) */
+.item-card-icon { display: none; }
+
+/* ---------- Swapped overlay ---------- */
+.item-card-swapped { opacity: 0.6; }
+
+/* Legacy wrapper kept as a no-op in case referenced */
+.item-card-status-overlay { display: contents; }
 
 .item-card-status-badge {
-  background: rgba(27, 67, 50, 0.9);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(31, 51, 41, 0.88);
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .item-card-distance {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(27, 58, 42, 0.8);
+  top: 10px;
+  right: 10px;
+  background: rgba(31, 51, 41, 0.85);
   color: #fff;
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
+/* ---------- Info ---------- */
 .item-card-info {
-  padding: 12px;
+  padding: 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .item-card-title {
+  font-family: var(--font-sans);
   font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--color-forest-900);
+  margin-bottom: 8px;
+  letter-spacing: -0.1px;
+  line-height: 1.35;
+  /* clamp to 2 lines for grid consistency */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .item-card-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .item-card-owner {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
 }
 
 .item-card-owner-name {
@@ -99,10 +141,12 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text);
+  line-height: 1.3;
 }
 
 .item-card-owner-location {
   display: block;
-  font-size: 10px;
-  color: var(--color-text-secondary);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.3;
 }

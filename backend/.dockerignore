@@ -1,0 +1,27 @@
+# Keep the built image lean and don't leak secrets.
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local data — production uses Supabase, never ship the dev DB.
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Local env. Real prod values are set via `fly secrets set`.
+.env
+.env.local
+
+# Editor / OS junk.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Migrations folder is empty for now; uncomment once you actually use Alembic.
+# migrations/versions/__pycache__/

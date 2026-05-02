@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,6 +15,7 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-change-me")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
 
     # Cloudinary
     CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
@@ -25,12 +28,22 @@ class Config:
     MAIL_USERNAME = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
+    # Frontend URL — used to build password-reset links emailed to users.
+    # Override with FRONTEND_URL=https://your-domain.tld in prod.
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 
 class DevelopmentConfig(Config):
-    """Development config - uses local SQLite so you don't need Supabase yet."""
+    """Development config.
+
+    Uses DATABASE_URL from .env if set (e.g. Supabase), otherwise falls back
+    to local SQLite for offline work.
+    """
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///swapmart_dev.db"
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL", "sqlite:///swapmart_dev.db"
+    )
 
 
 class ProductionConfig(Config):

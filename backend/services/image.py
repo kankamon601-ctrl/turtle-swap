@@ -54,14 +54,15 @@ def resize_image(file_data):
 
 
 def upload_image(file_data, filename):
-    """Upload image to Cloudinary with auto-resize.
+    """Upload image to Cloudinary.
 
+    Accepts raw or pre-resized image data.
     Returns the image URL or raises an error.
     """
     init_cloudinary()
 
-    # Resize locally first to save bandwidth
-    resized = resize_image(file_data)
+    # Wrap in BytesIO if raw bytes (already resized in route)
+    resized = io.BytesIO(file_data) if isinstance(file_data, bytes) else file_data
 
     # Upload to Cloudinary with moderation
     # The 'upload' method returns image info including the URL
@@ -89,12 +90,13 @@ def check_image_safety(file_data):
 
     This basic check verifies:
     - File is actually an image (not a renamed executable)
-    - File size is within limits
+    - Raw file size is within upload limit (20MB)
     - File dimensions are reasonable
     """
-    # Check file size
-    if len(file_data) > MAX_FILE_SIZE:
-        return False, "Image exceeds 5MB size limit"
+    # Reject very large raw uploads (20MB) to prevent abuse
+    max_raw_size = 20 * 1024 * 1024
+    if len(file_data) > max_raw_size:
+        return False, "Image exceeds 20MB upload limit"
 
     # Verify it's actually an image
     try:

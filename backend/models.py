@@ -16,14 +16,46 @@ def generate_uuid():
 class User(db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     avatar_url = db.Column(db.String(500), default="")
+
+    # Legacy free-text label — now derived as "City, Country" for display
     location = db.Column(db.String(255), default="")
+
+    # Structured address (used by geocoder + nearby search)
+    country = db.Column(db.String(100), default="")
+    city = db.Column(db.String(100), default="")
+    street = db.Column(db.String(255), default="")
+    postal_code = db.Column(db.String(20), default="")
+
+    # Geocoded coordinates (populated from the address fields above)
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
+
+    # WhatsApp number (with country code, e.g. "+66812345678")
+    # Also serves as the user's phone number — no separate phone field needed
+    whatsapp = db.Column(db.String(30), default="")
+
+    # Email notification preferences
+    email_notifications = db.Column(db.Boolean, default=True)
+    # True when we've already sent an offer-notification email and the user
+    # hasn't opened the Offers page yet.  Prevents spamming per-offer emails.
+    offer_notified_pending = db.Column(db.Boolean, default=False)
+
+    # Password reset — store only the SHA-256 hash of the raw token (the raw
+    # token is sent in the email link). Cleared after a successful reset so
+    # any given token can only be used once.
+    password_reset_token_hash = db.Column(db.String(64), nullable=True)
+    password_reset_expires_at = db.Column(db.DateTime, nullable=True)
+
+    # When the user accepted the SwapHoot Terms of Service. NULL for any
+    # legacy account that predates terms enforcement; required for all new
+    # signups. Kept as an audit trail in case of disputes.
+    terms_accepted_at = db.Column(db.DateTime, nullable=True)
+
     created_at = db.Column(
         db.DateTime, default=lambda: datetime.now(timezone.utc)
     )
@@ -38,8 +70,14 @@ class User(db.Model):
             "username": self.username,
             "avatar_url": self.avatar_url,
             "location": self.location,
+            "country": self.country,
+            "city": self.city,
+            "street": self.street,
+            "postal_code": self.postal_code,
             "latitude": self.latitude,
             "longitude": self.longitude,
+            "whatsapp": self.whatsapp,
+            "email_notifications": self.email_notifications,
             "created_at": self.created_at.isoformat(),
         }
 
@@ -50,9 +88,18 @@ class User(db.Model):
 class Item(db.Model):
     __tablename__ = "items"
 
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    # Internal int PK — used for fast joins and foreign keys.
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Public, unguessable ID — exposed to the world in URLs and API payloads.
+    # Prevents catalogue scraping by sequential IDs.
+    public_id = db.Column(
+        db.String(36), unique=True, index=True,
+        nullable=False, default=generate_uuid,
+    )
+
     user_id = db.Column(
-        db.String(36), db.ForeignKey("users.id"), nullable=False
+        db.Integer, db.ForeignKey("users.id"), nullable=False
     )
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, default="")
@@ -70,8 +117,10 @@ class Item(db.Model):
     )
 
     def to_dict(self):
+        # The frontend only ever sees public_id — exposed as "id" so it's a
+        # drop-in replacement for the old UUID PK.
         return {
-            "id": self.id,
+            "id": self.public_id,
             "user_id": self.user_id,
             "title": self.title,
             "description": self.description,
@@ -91,9 +140,9 @@ class Item(db.Model):
 class ItemImage(db.Model):
     __tablename__ = "item_images"
 
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     item_id = db.Column(
-        db.String(36), db.ForeignKey("items.id"), nullable=False
+        db.Integer, db.ForeignKey("items.id"), nullable=False
     )
     image_url = db.Column(db.String(500), nullable=False)
     sort_order = db.Column(db.Integer, default=0)
@@ -112,17 +161,17 @@ class ItemImage(db.Model):
 class Offer(db.Model):
     __tablename__ = "offers"
 
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     offered_item_id = db.Column(
-        db.String(36), db.ForeignKey("items.id"), nullable=False
+        db.Integer, db.ForeignKey("items.id"), nullable=False
     )
     target_item_id = db.Column(
-        db.String(36), db.ForeignKey("items.id"), nullable=False
+        db.Integer, db.ForeignKey("items.id"), nullable=False
     )
     offerer_id = db.Column(
-        db.String(36), db.ForeignKey("users.id"), nullable=False
+        db.Integer, db.ForeignKey("users.id"), nullable=False
     )
-    status = db.Column(db.String(20), default="pending")  # pending, accepted, rejected
+    status = db.Column(db.String(20), default="pending")  # pending, held, accepted, rejected
     message = db.Column(db.Text, default="")
     created_at = db.Column(
         db.DateTime, default=lambda: datetime.now(timezone.utc)
@@ -151,15 +200,15 @@ class Offer(db.Model):
 class Match(db.Model):
     __tablename__ = "matches"
 
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     offer_id = db.Column(
-        db.String(36), db.ForeignKey("offers.id"), nullable=False
+        db.Integer, db.ForeignKey("offers.id"), nullable=False
     )
     user_a_id = db.Column(
-        db.String(36), db.ForeignKey("users.id"), nullable=False
+        db.Integer, db.ForeignKey("users.id"), nullable=False
     )
     user_b_id = db.Column(
-        db.String(36), db.ForeignKey("users.id"), nullable=False
+        db.Integer, db.ForeignKey("users.id"), nullable=False
     )
     notified = db.Column(db.Boolean, default=False)
     matched_at = db.Column(
@@ -188,15 +237,15 @@ class Match(db.Model):
 class Review(db.Model):
     __tablename__ = "reviews"
 
-    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     match_id = db.Column(
-        db.String(36), db.ForeignKey("matches.id"), nullable=False
+        db.Integer, db.ForeignKey("matches.id"), nullable=False
     )
     reviewer_id = db.Column(
-        db.String(36), db.ForeignKey("users.id"), nullable=False
+        db.Integer, db.ForeignKey("users.id"), nullable=False
     )
     reviewed_id = db.Column(
-        db.String(36), db.ForeignKey("users.id"), nullable=False
+        db.Integer, db.ForeignKey("users.id"), nullable=False
     )
     rating = db.Column(db.Integer, nullable=False)  # 1 to 5
     comment = db.Column(db.Text, default="")
